@@ -1,0 +1,33 @@
+name: PriceAI cloud monitor
+on:
+  workflow_dispatch:
+    inputs:
+      scheduler_only:
+        description: Measure startup timing without fetching prices
+        type: boolean
+        default: false
+      dry_run:
+        description: Fetch price without updating state or sending email
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: priceai-monitor-cloud
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check reference price
+        env:
+          WORKER_URL: ${{ vars.WORKER_URL }}
+          REPORT_TOKEN: ${{ secrets.REPORT_TOKEN }}
+          SCHEDULER_ONLY: ${{ inputs.scheduler_only }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: python monitor.py

@@ -1,0 +1,11 @@
+# PriceAI云端参考价监控
+
+由Cloudflare定时触发GitHub Actions，读取PriceAI公开页面的参考价并回传Cloudflare。价格状态和邮件配置保存在Cloudflare，公开仓库不保存邮箱、邮件授权码或访问令牌。
+
+GitHub不配置定时任务。外部触发可以绕过GitHub定时调度，执行资源仍可能排队，不能保证每次准点完成。
+
+仓库变量WORKER_URL指定接收端，仓库Secret REPORT_TOKEN用于回传认证。
+
+手动运行时开启scheduler_only，仅测量启动时间。开启dry_run则抓取参考价，但不更新价格状态、不发送邮件。网站返回429时记录等待期限，期间暂停抓取。
+
+监控值来自页面meta description中的参考价，实际交易价格以商家页面为准。
