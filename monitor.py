@@ -34,13 +34,20 @@ def main():
     def report(path, data):
         request = Request(base + path, data=json.dumps(data).encode(), headers={
             'Content-Type': 'application/json',
+            'User-Agent': 'PriceAI-Monitor/1.0',
             'Authorization': 'Bearer ' + os.environ['REPORT_TOKEN'],
         })
         with urlopen(request, timeout=45) as response:
             return json.load(response)
 
-    with urlopen(base + '/health', timeout=20) as response:
-        health = json.load(response)
+    try:
+        with urlopen(Request(base + '/health', headers={'User-Agent': 'PriceAI-Monitor/1.0'}), timeout=20) as response:
+            health = json.load(response)
+    except HTTPError as error:
+        print('Cloud endpoint rejected health request', error.code,
+              'server', error.headers.get('Server'),
+              'body', error.read(500).decode('utf-8', errors='replace'))
+        raise
     if (health.get('source_backoff') or {}).get('next_allowed_at', 0) > time.time() * 1000:
         print('Source cooldown active. No price request sent.')
         return
