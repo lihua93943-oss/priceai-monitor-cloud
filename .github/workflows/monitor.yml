@@ -2,6 +2,10 @@ name: PriceAI cloud monitor
 on:
   workflow_dispatch:
     inputs:
+      scheduled_at:
+        description: Cloud scheduler timestamp in milliseconds
+        type: string
+        required: false
       scheduler_only:
         description: Measure startup timing without fetching prices
         type: boolean
@@ -30,4 +34,5 @@ jobs:
           REPORT_TOKEN: ${{ secrets.REPORT_TOKEN }}
           SCHEDULER_ONLY: ${{ inputs.scheduler_only }}
           DRY_RUN: ${{ inputs.dry_run }}
+          TRIGGER_SCHEDULED_AT: ${{ inputs.scheduled_at }}
         run: python monitor.py

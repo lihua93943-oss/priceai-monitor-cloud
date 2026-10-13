@@ -85,7 +85,9 @@ def main():
     if dry_run:
         print('Dry run completed without changing price state or sending email.')
         return
-    result = report('/ingest', {'price_cents': cents, 'observed_at': int(time.time() * 1000)})
+    observed_at = int(time.time() * 1000)
+    scheduled_at = int(os.environ.get('TRIGGER_SCHEDULED_AT') or observed_at)
+    result = report('/ingest', {'price_cents': cents, 'observed_at': observed_at, 'scheduled_at': scheduled_at})
     print(json.dumps(result, ensure_ascii=False))
     if result.get('outcome') not in {'ok', 'paused', 'stale'}:
         raise RuntimeError('Price report was not processed')
